@@ -443,10 +443,17 @@ export const generateMonthlyPDF = (invoices: Invoice[], monthLabel: string) => {
   
   yPos += 5;
   
+  // Count unique invoices per product
+  const getUniqueInvoiceCount = (productName: string): number => {
+    return invoices.filter(inv => 
+      inv.products?.some(p => p.product_name === productName && Number(p.amount) > 0)
+    ).length;
+  };
+
   const productRows = productSummaries.map(p => [
     p.name,
     `${p.percentage}%`,
-    String(p.count),
+    String(getUniqueInvoiceCount(p.name)),
     `$${formatNumber(p.totalAmount)}`,
     `$${formatCurrency(p.totalCommission)}`
   ]);

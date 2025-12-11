@@ -296,32 +296,30 @@ export const MonthlyBreakdown = ({ invoices, onUpdateInvoice, onDeleteInvoice }:
                         key={i} 
                         className="flex items-center justify-between text-sm py-2.5 px-3 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors"
                       >
-                        <div className="flex items-center justify-between">
-                          <div className="flex flex-col gap-0.5">
-                            <span className="text-foreground font-medium font-mono text-xs">
-                              {entry.ncf}
-                            </span>
-                            <span className="text-muted-foreground text-xs">
-                              {format(parseInvoiceDate(entry.date), 'd MMM yyyy', { locale: es })}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold text-foreground">
-                              ${formatNumber(entry.amount)}
-                            </span>
-                            {onUpdateInvoice && onDeleteInvoice && (
-                              <EditInvoiceDialog
-                                invoice={filteredInvoices.find(inv => inv.ncf === entry.ncf)!}
-                                onUpdate={onUpdateInvoice}
-                                onDelete={onDeleteInvoice}
-                                trigger={
-                                  <Button variant="ghost" size="icon" className="h-6 w-6">
-                                    <Pencil className="h-3 w-3" />
-                                  </Button>
-                                }
-                              />
-                            )}
-                          </div>
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-foreground font-medium font-mono text-xs">
+                            {entry.ncf}
+                          </span>
+                          <span className="text-muted-foreground text-xs">
+                            {format(parseInvoiceDate(entry.date), 'd MMM yyyy', { locale: es })}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-foreground">
+                            ${formatNumber(entry.amount)}
+                          </span>
+                          {onUpdateInvoice && onDeleteInvoice && (
+                            <EditInvoiceDialog
+                              invoice={filteredInvoices.find(inv => inv.ncf === entry.ncf)!}
+                              onUpdate={onUpdateInvoice}
+                              onDelete={onDeleteInvoice}
+                              trigger={
+                                <Button variant="ghost" size="icon" className="h-6 w-6 hover:bg-primary/10">
+                                  <Pencil className="h-3 w-3" />
+                                </Button>
+                              }
+                            />
+                          )}
                         </div>
                       </div>
                     ))}
@@ -385,9 +383,23 @@ export const MonthlyBreakdown = ({ invoices, onUpdateInvoice, onDeleteInvoice }:
                             {format(parseInvoiceDate(entry.date), 'd MMM yyyy', { locale: es })}
                           </span>
                         </div>
-                        <span className="font-semibold text-foreground">
-                          ${formatNumber(entry.amount)}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-foreground">
+                            ${formatNumber(entry.amount)}
+                          </span>
+                          {onUpdateInvoice && onDeleteInvoice && (
+                            <EditInvoiceDialog
+                              invoice={filteredInvoices.find(inv => inv.ncf === entry.ncf)!}
+                              onUpdate={onUpdateInvoice}
+                              onDelete={onDeleteInvoice}
+                              trigger={
+                                <Button variant="ghost" size="icon" className="h-6 w-6 hover:bg-primary/10">
+                                  <Pencil className="h-3 w-3" />
+                                </Button>
+                              }
+                            />
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>

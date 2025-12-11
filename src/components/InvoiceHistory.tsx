@@ -2,21 +2,33 @@ import { useState, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Trash2, ChevronDown, ChevronUp, FileSpreadsheet, Calendar, Receipt, Hash, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Sparkles } from 'lucide-react';
+import { Trash2, ChevronDown, ChevronUp, FileSpreadsheet, Calendar, Receipt, Hash, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Sparkles, Pencil } from 'lucide-react';
 import { Invoice } from '@/hooks/useInvoices';
 import { formatCurrency, formatNumber } from '@/lib/formatters';
 import { format, startOfMonth, endOfMonth, isWithinInterval, subMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
 import * as XLSX from 'xlsx';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { EditInvoiceDialog } from '@/components/EditInvoiceDialog';
 
 interface InvoiceHistoryProps {
   invoices: Invoice[];
   loading: boolean;
   onDelete: (id: string) => Promise<boolean>;
+  onUpdate?: (
+    id: string,
+    ncf: string,
+    invoiceDate: string,
+    totalAmount: number,
+    restAmount: number,
+    restPercentage: number,
+    restCommission: number,
+    totalCommission: number,
+    products: { name: string; amount: number; percentage: number; commission: number }[]
+  ) => Promise<any>;
 }
 
-export const InvoiceHistory = ({ invoices, loading, onDelete }: InvoiceHistoryProps) => {
+export const InvoiceHistory = ({ invoices, loading, onDelete, onUpdate }: InvoiceHistoryProps) => {
   const [selectedMonth, setSelectedMonth] = useState<string>('all');
   const [expandedInvoice, setExpandedInvoice] = useState<string | null>(null);
 
@@ -287,6 +299,23 @@ export const InvoiceHistory = ({ invoices, loading, onDelete }: InvoiceHistoryPr
                         <p className="font-bold text-success">${formatCurrency(invoice.total_commission)}</p>
                       </div>
                       <div className="flex items-center gap-1">
+                        {onUpdate && (
+                          <EditInvoiceDialog
+                            invoice={invoice}
+                            onUpdate={onUpdate}
+                            onDelete={onDelete}
+                            trigger={
+                              <Button 
+                                variant="ghost" 
+                                size="icon"
+                                className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                            }
+                          />
+                        )}
                         <Button 
                           variant="ghost" 
                           size="icon"

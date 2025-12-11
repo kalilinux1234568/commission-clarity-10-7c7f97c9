@@ -48,12 +48,12 @@ export const EditInvoiceDialog = ({ invoice, onUpdate, onDelete, trigger }: Edit
   const [products, setProducts] = useState<{ name: string; amount: number; percentage: number; commission: number }[]>([]);
   const [restPercentage] = useState(invoice.rest_percentage || 25);
 
-  const ncfPrefix = 'B010000';
+  const ncfPrefix = 'B01000';
 
   useEffect(() => {
     if (open) {
       // Extract last 4 digits from NCF
-      const suffix = invoice.ncf.slice(-4);
+      const suffix = invoice.ncf.length >= 4 ? invoice.ncf.slice(-4) : invoice.ncf;
       setNcfSuffix(suffix);
       setInvoiceDate(parseInvoiceDate(invoice.invoice_date || invoice.created_at));
       setTotalAmount(invoice.total_amount);
