@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { RotateCcw, Calculator, DollarSign, Check, Package, CalendarIcon, FileText, CheckCircle2 } from "lucide-react";
+import { RotateCcw, Calculator, DollarSign, Check, Package, CalendarIcon, FileText, CheckCircle2, ChevronDown } from "lucide-react";
 import { SaveInvoiceDialog } from "@/components/SaveInvoiceDialog";
 import { EditRestPercentageDialog } from "@/components/EditRestPercentageDialog";
 import { BreakdownTable } from "@/components/BreakdownTable";
@@ -84,6 +84,7 @@ export const CalculatorView = ({
   const [ncfSuffix, setNcfSuffix] = useState('');
   const [invoiceDate, setInvoiceDate] = useState<Date>(new Date());
   const [step1Complete, setStep1Complete] = useState(false);
+  const [step1Collapsed, setStep1Collapsed] = useState(false);
 
   const ncfPrefix = 'B01000';
 
@@ -139,6 +140,7 @@ export const CalculatorView = ({
   const handleContinue = () => {
     if (ncfSuffix.length === 4) {
       setStep1Complete(true);
+      setStep1Collapsed(true);
     }
   };
 
@@ -175,79 +177,112 @@ export const CalculatorView = ({
             </div>
           </div>
 
-          {/* Step 1: NCF and Date */}
-          <div className="p-5 border-b border-border">
-            <div className="flex items-center gap-2 mb-4">
-              <div className={`h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold ${
-                step1Complete ? 'bg-success text-success-foreground' : 'bg-primary text-primary-foreground'
-              }`}>
-                {step1Complete ? <Check className="h-4 w-4" /> : '1'}
-              </div>
-              <h3 className="font-semibold text-foreground">Datos de la Factura</h3>
-            </div>
-
-            <div className="space-y-4">
-              {/* Date Picker */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Fecha de la Factura</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal h-11",
-                        !invoiceDate && "text-muted-foreground"
-                      )}
+          {/* Step 1: NCF and Date - Collapsible when complete */}
+          <div className={`border-b border-border transition-all duration-300 ${step1Collapsed ? 'bg-muted/20' : ''}`}>
+            {/* Collapsed Header (clickable to expand) */}
+            {step1Collapsed ? (
+              <button 
+                onClick={() => setStep1Collapsed(false)}
+                className="w-full p-4 flex items-center justify-between hover:bg-muted/30 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="h-7 w-7 rounded-full bg-success text-success-foreground flex items-center justify-center">
+                    <Check className="h-4 w-4" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-medium text-foreground">
+                      {format(invoiceDate, "d MMM yyyy", { locale: es })} · <span className="font-mono">{fullNcf}</span>
+                    </p>
+                    <p className="text-xs text-muted-foreground">Clic para editar</p>
+                  </div>
+                </div>
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              </button>
+            ) : (
+              <div className="p-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className={`h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold ${
+                    step1Complete ? 'bg-success text-success-foreground' : 'bg-primary text-primary-foreground'
+                  }`}>
+                    {step1Complete ? <Check className="h-4 w-4" /> : '1'}
+                  </div>
+                  <h3 className="font-semibold text-foreground">Datos de la Factura</h3>
+                  {step1Complete && (
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="ml-auto text-xs"
+                      onClick={() => setStep1Collapsed(true)}
                     >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {invoiceDate ? format(invoiceDate, "d 'de' MMMM, yyyy", { locale: es }) : <span>Seleccionar fecha</span>}
+                      Colapsar
                     </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={invoiceDate}
-                      onSelect={(date) => date && setInvoiceDate(date)}
-                      initialFocus
-                      locale={es}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-
-              {/* NCF Input */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">NCF (últimos 4 dígitos)</Label>
-                <div className="flex items-center rounded-lg border border-border bg-muted/30 overflow-hidden">
-                  <span className="px-3 py-2.5 text-base font-mono font-medium text-muted-foreground bg-muted border-r border-border">
-                    {ncfPrefix}
-                  </span>
-                  <Input
-                    value={ncfSuffix}
-                    onChange={handleNcfChange}
-                    placeholder="0000"
-                    className="border-0 text-base font-mono font-bold text-center focus-visible:ring-0 h-11"
-                    maxLength={4}
-                    inputMode="numeric"
-                  />
+                  )}
                 </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">NCF completo: <span className="font-mono font-semibold text-foreground">{fullNcf}</span></span>
-                  {canProceed && <CheckCircle2 className="h-4 w-4 text-success" />}
+
+                <div className="space-y-4">
+                  {/* Date Picker */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Fecha de la Factura</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal h-11",
+                            !invoiceDate && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {invoiceDate ? format(invoiceDate, "d 'de' MMMM, yyyy", { locale: es }) : <span>Seleccionar fecha</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={invoiceDate}
+                          onSelect={(date) => date && setInvoiceDate(date)}
+                          initialFocus
+                          locale={es}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  {/* NCF Input */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">NCF (últimos 4 dígitos)</Label>
+                    <div className="flex items-center rounded-lg border border-border bg-muted/30 overflow-hidden">
+                      <span className="px-3 py-2.5 text-base font-mono font-medium text-muted-foreground bg-muted border-r border-border">
+                        {ncfPrefix}
+                      </span>
+                      <Input
+                        value={ncfSuffix}
+                        onChange={handleNcfChange}
+                        placeholder="0000"
+                        className="border-0 text-base font-mono font-bold text-center focus-visible:ring-0 h-11"
+                        maxLength={4}
+                        inputMode="numeric"
+                      />
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">NCF completo: <span className="font-mono font-semibold text-foreground">{fullNcf}</span></span>
+                      {canProceed && <CheckCircle2 className="h-4 w-4 text-success" />}
+                    </div>
+                  </div>
+
+                  {/* Continue Button - only show if not yet proceeded */}
+                  {!step1Complete && (
+                    <Button 
+                      onClick={handleContinue} 
+                      disabled={!canProceed}
+                      className="w-full h-11 gradient-primary"
+                    >
+                      Continuar
+                    </Button>
+                  )}
                 </div>
               </div>
-
-              {/* Continue Button - only show if not yet proceeded */}
-              {!step1Complete && (
-                <Button 
-                  onClick={handleContinue} 
-                  disabled={!canProceed}
-                  className="w-full h-11 gradient-primary"
-                >
-                  Continuar
-                </Button>
-              )}
-            </div>
+            )}
           </div>
 
           {/* Step 2: Invoice Total - only show after step 1 */}

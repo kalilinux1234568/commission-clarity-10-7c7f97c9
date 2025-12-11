@@ -68,18 +68,18 @@ export const MonthlyBreakdown = ({ invoices, onUpdateInvoice, onDeleteInvoice, s
   });
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
-  // Generate available months - always show last 4 months plus any with invoices
+  // Generate available months - show all 12 months of current year plus any with invoices
   const months = useMemo(() => {
     const uniqueMonths = new Set<string>();
     
-    // Always add the last 4 months (current month included)
+    // Add all 12 months of current year
     const now = new Date();
-    for (let i = 0; i < 4; i++) {
-      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      uniqueMonths.add(getMonthKey(date));
+    const currentYear = now.getFullYear();
+    for (let m = 0; m < 12; m++) {
+      uniqueMonths.add(`${currentYear}-${String(m + 1).padStart(2, '0')}`);
     }
     
-    // Add months from invoices
+    // Add months from invoices (could be from other years)
     invoices.forEach(inv => {
       const date = parseInvoiceDate(inv.invoice_date || inv.created_at);
       uniqueMonths.add(getMonthKey(date));
@@ -271,8 +271,8 @@ export const MonthlyBreakdown = ({ invoices, onUpdateInvoice, onDeleteInvoice, s
         </Card>
       ) : (
         <>
-          {/* Product Cards Grid - Diseño Limpio y Moderno */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+          {/* Product Cards Grid - Diseño más amplio */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             {productsBreakdown.map((product, index) => (
               <Card 
                 key={product.name} 

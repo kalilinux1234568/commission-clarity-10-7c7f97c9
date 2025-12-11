@@ -2,12 +2,12 @@ import { useState, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Trash2, ChevronDown, ChevronUp, FileSpreadsheet, Calendar, Receipt, Hash, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Sparkles, Pencil } from 'lucide-react';
+import { Trash2, ChevronDown, ChevronUp, Calendar, Receipt, Hash, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Sparkles, Pencil } from 'lucide-react';
 import { Invoice } from '@/hooks/useInvoices';
 import { formatCurrency, formatNumber } from '@/lib/formatters';
 import { format, startOfMonth, endOfMonth, isWithinInterval, subMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
-import * as XLSX from 'xlsx';
+
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { EditInvoiceDialog } from '@/components/EditInvoiceDialog';
 
@@ -92,31 +92,6 @@ export const InvoiceHistory = ({ invoices, loading, onDelete, onUpdate }: Invoic
   const salesChange = previousPeriodStats ? getChangePercent(totalStats.totalAmount, previousPeriodStats.totalAmount) : null;
   const commissionChange = previousPeriodStats ? getChangePercent(totalStats.totalCommission, previousPeriodStats.totalCommission) : null;
 
-  const exportToExcel = () => {
-    const data = filteredInvoices.map(inv => ({
-      'NCF': inv.ncf,
-      'Fecha Factura': format(new Date(inv.invoice_date || inv.created_at), 'dd/MM/yyyy', { locale: es }),
-      'Total Factura': inv.total_amount,
-      'Resto': inv.rest_amount,
-      '% Resto': inv.rest_percentage,
-      'Comisión Resto': inv.rest_commission,
-      'Comisión Total': inv.total_commission,
-      ...(inv.products || []).reduce((acc, p, idx) => ({
-        ...acc,
-        [`Producto ${idx + 1}`]: p.product_name,
-        [`Monto ${idx + 1}`]: p.amount,
-        [`% ${idx + 1}`]: p.percentage,
-        [`Comisión ${idx + 1}`]: p.commission,
-      }), {}),
-    }));
-
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Facturas');
-    
-    const monthLabel = selectedMonth === 'all' ? 'todas' : selectedMonth;
-    XLSX.writeFile(wb, `comisiones_${monthLabel}.xlsx`);
-  };
 
   if (loading) {
     return (
@@ -239,10 +214,6 @@ export const InvoiceHistory = ({ invoices, loading, onDelete, onUpdate }: Invoic
               </Select>
             </div>
             
-            <Button variant="outline" onClick={exportToExcel} className="gap-2 border-border hover-lift">
-              <FileSpreadsheet className="h-4 w-4" />
-              Exportar Excel
-            </Button>
           </div>
         </Card>
 

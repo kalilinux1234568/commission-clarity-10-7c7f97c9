@@ -23,10 +23,26 @@ export const useSellers = () => {
     if (error) {
       toast.error('Error al cargar vendedores');
       console.error(error);
+      setLoading(false);
+      return;
+    }
+    
+    // If no sellers exist, create default one
+    if (!data || data.length === 0) {
+      const { data: newSeller, error: insertError } = await supabase
+        .from('sellers')
+        .insert({ name: 'Neftalí Jiménez', is_active: true })
+        .select()
+        .single();
+      
+      if (!insertError && newSeller) {
+        setSellers([newSeller]);
+        setActiveSeller(newSeller);
+      }
     } else {
-      setSellers(data || []);
+      setSellers(data);
       // Set first active seller as default if none selected
-      if (!activeSeller && data && data.length > 0) {
+      if (!activeSeller) {
         const firstActive = data.find(s => s.is_active);
         if (firstActive) setActiveSeller(firstActive);
       }
