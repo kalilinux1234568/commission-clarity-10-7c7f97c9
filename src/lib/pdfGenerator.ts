@@ -95,17 +95,26 @@ export const generateBreakdownPdf = async (data: BreakdownData, selectedMonth: s
   doc.setFontSize(9);
   doc.text('RESUMEN', margin + 5, yPos + 2);
   
-  const productCount = data.products.length + (data.rest.totalAmount > 0 ? 1 : 0);
-  // Count unique invoices by NCF
+// Count unique invoices by NCF
   const uniqueNcfs = new Set<string>();
   data.products.forEach(p => p.entries.forEach(e => uniqueNcfs.add(e.ncf)));
   data.rest.entries.forEach(e => uniqueNcfs.add(e.ncf));
   const invoiceCount = uniqueNcfs.size;
   
+  // Lógica para el nuevo texto del resumen
+  const variableCount = data.products.length;
+  const hasRest = data.rest.totalAmount > 0;
+  
+  let summaryText = `${variableCount} producto(s) con comisiones variables`;
+  if (hasRest) {
+    summaryText += " + Resto de facts (25%)";
+  }
+  summaryText += ` • ${invoiceCount} Facturas`;
+  
   doc.setTextColor(colors.darkGrey);
-  doc.setFontSize(10);
+  doc.setFontSize(8); // Letra más pequeña para que quepa todo
   doc.setFont('helvetica', 'bold');
-  doc.text(`${productCount} Productos  •  ${invoiceCount} Facturas`, margin + 5, yPos + 10);
+  doc.text(summaryText, margin + 5, yPos + 10);
   
   doc.setTextColor(colors.success);
   doc.setFontSize(12);
