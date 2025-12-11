@@ -20,6 +20,7 @@ export interface Invoice {
   total_commission: number;
   created_at: string;
   invoice_date: string;
+  seller_id?: string | null;
   products?: InvoiceProduct[];
 }
 
@@ -67,7 +68,8 @@ export const useInvoices = () => {
     restPercentage: number,
     restCommission: number,
     totalCommission: number,
-    products: { name: string; amount: number; percentage: number; commission: number }[]
+    products: { name: string; amount: number; percentage: number; commission: number }[],
+    sellerId?: string | null
   ) => {
     // Check if NCF already exists
     const { data: existing } = await supabase
@@ -91,6 +93,7 @@ export const useInvoices = () => {
         rest_percentage: restPercentage,
         rest_commission: restCommission,
         total_commission: totalCommission,
+        seller_id: sellerId || null,
       })
       .select()
       .single();

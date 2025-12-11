@@ -13,6 +13,7 @@ import { AdvancedStatistics } from '@/components/AdvancedStatistics';
 
 interface StatisticsProps {
   invoices: Invoice[];
+  sellerName?: string;
 }
 
 // Helper function to parse dates correctly without timezone issues
@@ -24,7 +25,7 @@ const parseInvoiceDate = (dateString: string): Date => {
   return new Date(dateString);
 };
 
-export const Statistics = ({ invoices }: StatisticsProps) => {
+export const Statistics = ({ invoices, sellerName }: StatisticsProps) => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showAdvanced, setShowAdvanced] = useState(false);
 

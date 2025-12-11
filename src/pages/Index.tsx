@@ -4,15 +4,18 @@ import { Calculator, History, BarChart3, Layers } from "lucide-react";
 import { useProducts } from "@/hooks/useProducts";
 import { useSettings } from "@/hooks/useSettings";
 import { useInvoices } from "@/hooks/useInvoices";
+import { useSellers } from "@/hooks/useSellers";
 import { CalculatorView } from "@/components/CalculatorView";
 import { InvoiceHistory } from "@/components/InvoiceHistory";
 import { Statistics } from "@/components/Statistics";
 import { MonthlyBreakdown } from "@/components/MonthlyBreakdown";
+import { SellerManager } from "@/components/SellerManager";
 
 const Index = () => {
   const { products, loading: productsLoading, addProduct, updateProduct, deleteProduct } = useProducts();
   const { restPercentage, loading: settingsLoading, updateRestPercentage, getNextNcfNumber, updateLastNcfNumber } = useSettings();
   const { invoices, loading: invoicesLoading, saveInvoice, updateInvoice, deleteInvoice } = useInvoices();
+  const { sellers, activeSeller, loading: sellersLoading, addSeller, updateSeller, deleteSeller, selectSeller } = useSellers();
 
   const [totalInvoice, setTotalInvoice] = useState(0);
   const [productAmounts, setProductAmounts] = useState<Record<string, number>>({});
@@ -89,7 +92,8 @@ const Index = () => {
       restPercentage,
       calculations.restCommission,
       calculations.totalCommission,
-      productBreakdown
+      productBreakdown,
+      activeSeller?.id
     );
 
     if (result) {
@@ -108,23 +112,41 @@ const Index = () => {
 
   const isLoading = productsLoading || settingsLoading;
 
+  // Filter invoices by active seller
+  const filteredInvoices = useMemo(() => {
+    if (!activeSeller) return invoices;
+    return invoices.filter(inv => inv.seller_id === activeSeller.id);
+  }, [invoices, activeSeller]);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="mx-auto max-w-5xl px-4 py-4">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl gradient-primary flex items-center justify-center">
-              <Calculator className="h-5 w-5 text-primary-foreground" />
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl gradient-primary flex items-center justify-center">
+                <Calculator className="h-5 w-5 text-primary-foreground" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-foreground">
+                  Calculadora de Comisiones
+                </h1>
+                <p className="text-sm text-muted-foreground">
+                  Tu herramienta para calcular ganancias
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-xl font-bold text-foreground">
-                Calculadora de Comisiones
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Tu herramienta para calcular ganancias
-              </p>
-            </div>
+            
+            {/* Seller Manager */}
+            <SellerManager
+              sellers={sellers}
+              activeSeller={activeSeller}
+              onSelectSeller={selectSeller}
+              onAddSeller={addSeller}
+              onUpdateSeller={updateSeller}
+              onDeleteSeller={deleteSeller}
+            />
           </div>
         </div>
       </header>
@@ -179,12 +201,13 @@ const Index = () => {
               onUpdateRestPercentage={updateRestPercentage}
               onSaveInvoice={handleSaveInvoice}
               suggestedNcf={suggestedNcf}
+              activeSeller={activeSeller}
             />
           </TabsContent>
 
           <TabsContent value="history">
             <InvoiceHistory
-              invoices={invoices}
+              invoices={filteredInvoices}
               loading={invoicesLoading}
               onDelete={deleteInvoice}
               onUpdate={updateInvoice}
@@ -193,14 +216,15 @@ const Index = () => {
 
           <TabsContent value="breakdown">
             <MonthlyBreakdown 
-              invoices={invoices} 
+              invoices={filteredInvoices} 
               onUpdateInvoice={updateInvoice}
               onDeleteInvoice={deleteInvoice}
+              sellerName={activeSeller?.name}
             />
           </TabsContent>
 
           <TabsContent value="statistics">
-            <Statistics invoices={invoices} />
+            <Statistics invoices={filteredInvoices} sellerName={activeSeller?.name} />
           </TabsContent>
         </Tabs>
       </main>

@@ -41,7 +41,7 @@ const parseDate = (dateString: string): Date => {
 };
 
 // Generate breakdown PDF with light grey design for printing
-export const generateBreakdownPdf = async (data: BreakdownData, selectedMonth: string): Promise<void> => {
+export const generateBreakdownPdf = async (data: BreakdownData, selectedMonth: string, sellerName?: string): Promise<void> => {
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
@@ -79,7 +79,12 @@ export const generateBreakdownPdf = async (data: BreakdownData, selectedMonth: s
   doc.setTextColor(colors.mediumGrey);
   doc.text(data.month.toUpperCase(), pageWidth / 2, yPos + 14, { align: 'center' });
   
-  yPos = 55;
+  if (sellerName) {
+    doc.setFontSize(10);
+    doc.text(`Vendedor: ${sellerName}`, pageWidth / 2, yPos + 20, { align: 'center' });
+  }
+  
+  yPos = sellerName ? 60 : 55;
 
   // Summary Box
   doc.setFillColor(colors.background);

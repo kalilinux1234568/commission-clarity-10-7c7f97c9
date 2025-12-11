@@ -58,6 +58,7 @@ export type Database = {
           rest_amount: number
           rest_commission: number
           rest_percentage: number
+          seller_id: string | null
           total_amount: number
           total_commission: number
         }
@@ -69,6 +70,7 @@ export type Database = {
           rest_amount: number
           rest_commission: number
           rest_percentage?: number
+          seller_id?: string | null
           total_amount: number
           total_commission: number
         }
@@ -80,10 +82,19 @@ export type Database = {
           rest_amount?: number
           rest_commission?: number
           rest_percentage?: number
+          seller_id?: string | null
           total_amount?: number
           total_commission?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "invoices_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "sellers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       products: {
         Row: {
@@ -109,6 +120,27 @@ export type Database = {
           is_default?: boolean
           name?: string
           percentage?: number
+        }
+        Relationships: []
+      }
+      sellers: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
         }
         Relationships: []
       }

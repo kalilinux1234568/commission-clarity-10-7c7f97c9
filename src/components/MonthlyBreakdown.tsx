@@ -25,6 +25,7 @@ interface MonthlyBreakdownProps {
     products: { name: string; amount: number; percentage: number; commission: number }[]
   ) => Promise<any>;
   onDeleteInvoice?: (id: string) => Promise<boolean>;
+  sellerName?: string;
 }
 
 interface ProductEntry {
@@ -59,7 +60,7 @@ const getMonthKey = (date: Date): string => {
   return `${year}-${month}`;
 };
 
-export const MonthlyBreakdown = ({ invoices, onUpdateInvoice, onDeleteInvoice }: MonthlyBreakdownProps) => {
+export const MonthlyBreakdown = ({ invoices, onUpdateInvoice, onDeleteInvoice, sellerName }: MonthlyBreakdownProps) => {
   // Initialize with current month
   const [selectedMonth, setSelectedMonth] = useState<string>(() => {
     const now = new Date();
@@ -170,7 +171,7 @@ export const MonthlyBreakdown = ({ invoices, onUpdateInvoice, onDeleteInvoice }:
         products: productsBreakdown,
         rest: restBreakdown,
         grandTotal: grandTotalCommission,
-      }, selectedMonth);
+      }, selectedMonth, sellerName);
       toast.success('PDF generado correctamente');
     } catch (error) {
       console.error('Error generating PDF:', error);
