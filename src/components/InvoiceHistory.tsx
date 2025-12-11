@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Trash2, ChevronDown, ChevronUp, Calendar, Receipt, Hash, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Sparkles, Pencil } from 'lucide-react';
+import { Trash2, ChevronDown, Receipt, Hash, TrendingUp, ArrowUpRight, ArrowDownRight, Sparkles, Pencil } from 'lucide-react';
 import { Invoice } from '@/hooks/useInvoices';
 import { formatCurrency, formatNumber } from '@/lib/formatters';
 import { format, startOfMonth, endOfMonth, isWithinInterval, subMonths } from 'date-fns';
@@ -28,6 +28,17 @@ interface InvoiceHistoryProps {
   ) => Promise<any>;
 }
 
+// ESTA ES LA FUNCIÓN MÁGICA QUE ARREGLA LA FECHA
+const parseInvoiceDate = (dateString: string): Date => {
+  // Si viene como YYYY-MM-DD, lo dividimos manualmente para crear la fecha local
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+    const [year, month, day] = dateString.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  }
+  // Si no, dejamos que JS intente interpretarla
+  return new Date(dateString);
+};
+
 export const InvoiceHistory = ({ invoices, loading, onDelete, onUpdate }: InvoiceHistoryProps) => {
   const [selectedMonth, setSelectedMonth] = useState<string>('all');
   const [expandedInvoice, setExpandedInvoice] = useState<string | null>(null);
@@ -35,7 +46,8 @@ export const InvoiceHistory = ({ invoices, loading, onDelete, onUpdate }: Invoic
   const months = useMemo(() => {
     const uniqueMonths = new Set<string>();
     invoices.forEach(inv => {
-      const date = new Date(inv.invoice_date || inv.created_at);
+      // USAMOS LA FUNCIÓN AQUÍ TAMBIÉN
+      const date = parseInvoiceDate(inv.invoice_date || inv.created_at);
       uniqueMonths.add(format(date, 'yyyy-MM'));
     });
     return Array.from(uniqueMonths).sort().reverse();
@@ -49,7 +61,8 @@ export const InvoiceHistory = ({ invoices, loading, onDelete, onUpdate }: Invoic
     const end = endOfMonth(new Date(year, month - 1));
     
     return invoices.filter(inv => 
-      isWithinInterval(new Date(inv.invoice_date || inv.created_at), { start, end })
+      // Y AQUÍ
+      isWithinInterval(parseInvoiceDate(inv.invoice_date || inv.created_at), { start, end })
     );
   }, [invoices, selectedMonth]);
 
@@ -60,12 +73,8 @@ export const InvoiceHistory = ({ invoices, loading, onDelete, onUpdate }: Invoic
     };
   }, [filteredInvoices]);
 
-  // Calculate previous period stats for comparison
   const previousPeriodStats = useMemo(() => {
-    if (selectedMonth === 'all') {
-      // Compare all time to nothing - no comparison
-      return null;
-    }
+    if (selectedMonth === 'all') return null;
     
     const [year, month] = selectedMonth.split('-').map(Number);
     const currentDate = new Date(year, month - 1);
@@ -74,7 +83,8 @@ export const InvoiceHistory = ({ invoices, loading, onDelete, onUpdate }: Invoic
     const end = endOfMonth(prevDate);
     
     const prevInvoices = invoices.filter(inv => 
-      isWithinInterval(new Date(inv.invoice_date || inv.created_at), { start, end })
+      // Y AQUÍ
+      isWithinInterval(parseInvoiceDate(inv.invoice_date || inv.created_at), { start, end })
     );
     
     return {
@@ -91,7 +101,6 @@ export const InvoiceHistory = ({ invoices, loading, onDelete, onUpdate }: Invoic
 
   const salesChange = previousPeriodStats ? getChangePercent(totalStats.totalAmount, previousPeriodStats.totalAmount) : null;
   const commissionChange = previousPeriodStats ? getChangePercent(totalStats.totalCommission, previousPeriodStats.totalCommission) : null;
-
 
   if (loading) {
     return (
@@ -213,7 +222,6 @@ export const InvoiceHistory = ({ invoices, loading, onDelete, onUpdate }: Invoic
                 </SelectContent>
               </Select>
             </div>
-            
           </div>
         </Card>
 
@@ -255,7 +263,8 @@ export const InvoiceHistory = ({ invoices, loading, onDelete, onUpdate }: Invoic
                       <div>
                         <span className="font-mono text-sm font-bold text-foreground">{invoice.ncf}</span>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          {format(new Date(invoice.invoice_date || invoice.created_at), "d MMM yyyy", { locale: es })}
+                          {/* CORREGIDO AQUÍ: Usamos parseInvoiceDate */}
+                          {format(parseInvoiceDate(invoice.invoice_date || invoice.created_at), "d MMM yyyy", { locale: es })}
                         </p>
                       </div>
                     </div>
