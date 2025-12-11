@@ -12,7 +12,7 @@ import { MonthlyBreakdown } from "@/components/MonthlyBreakdown";
 const Index = () => {
   const { products, loading: productsLoading, addProduct, updateProduct, deleteProduct } = useProducts();
   const { restPercentage, loading: settingsLoading, updateRestPercentage, getNextNcfNumber, updateLastNcfNumber } = useSettings();
-  const { invoices, loading: invoicesLoading, saveInvoice, deleteInvoice } = useInvoices();
+  const { invoices, loading: invoicesLoading, saveInvoice, updateInvoice, deleteInvoice } = useInvoices();
 
   const [totalInvoice, setTotalInvoice] = useState(0);
   const [productAmounts, setProductAmounts] = useState<Record<string, number>>({});
@@ -187,11 +187,16 @@ const Index = () => {
               invoices={invoices}
               loading={invoicesLoading}
               onDelete={deleteInvoice}
+              onUpdate={updateInvoice}
             />
           </TabsContent>
 
           <TabsContent value="breakdown">
-            <MonthlyBreakdown invoices={invoices} />
+            <MonthlyBreakdown 
+              invoices={invoices} 
+              onUpdateInvoice={updateInvoice}
+              onDeleteInvoice={deleteInvoice}
+            />
           </TabsContent>
 
           <TabsContent value="statistics">

@@ -27,8 +27,8 @@ export const SaveInvoiceDialog = ({ totalInvoice, totalCommission, onSave, disab
   const [invoiceDate, setInvoiceDate] = useState<Date>(new Date());
   const [savedNcf, setSavedNcf] = useState('');
 
-  // NCF prefix is fixed (4 zeros, not 5)
-  const ncfPrefix = 'B010000';
+  // NCF prefix: B01 + 4 zeros, user adds last 4 digits
+  const ncfPrefix = 'B01000';
   const fullNcf = `${ncfPrefix}${ncfSuffix.padStart(4, '0')}`;
 
   // Set suggested NCF when dialog opens
