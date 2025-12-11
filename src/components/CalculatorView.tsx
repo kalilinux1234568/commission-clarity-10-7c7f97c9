@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { RotateCcw, Calculator, DollarSign, Check, Package, CalendarIcon, FileText, CheckCircle2, ChevronDown } from "lucide-react";
-import { SaveInvoiceDialog } from "@/components/SaveInvoiceDialog";
+import { RotateCcw, Calculator, DollarSign, Check, Package, CalendarIcon, FileText, CheckCircle2 } from "lucide-react";
 import { EditRestPercentageDialog } from "@/components/EditRestPercentageDialog";
 import { BreakdownTable } from "@/components/BreakdownTable";
 import { ProductManager } from "@/components/ProductManager";
@@ -178,7 +177,10 @@ export const CalculatorView = ({
           {/* Step 1: NCF and Date - Always visible */}
           <div className="border-b border-border">
             <div className="p-5">
-              <div className="flex items-center gap-2 mb-4">
+              <div 
+                className={`flex items-center gap-2 mb-4 ${step1Complete ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
+                onClick={() => setStep1Complete(false)}
+              >
                 <div className={`h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold ${
                   step1Complete ? 'bg-success text-success-foreground' : 'bg-primary text-primary-foreground'
                 }`}>
@@ -187,12 +189,13 @@ export const CalculatorView = ({
                 <h3 className="font-semibold text-foreground">Datos de la Factura</h3>
                 {step1Complete && (
                   <span className="ml-auto text-xs text-success flex items-center gap-1">
-                    <CheckCircle2 className="h-3.5 w-3.5" /> Completado
+                    <CheckCircle2 className="h-3.5 w-3.5" /> {fullNcf}
                   </span>
                 )}
               </div>
 
-                <div className="space-y-4">
+              {!step1Complete && (
+                <div className="space-y-4 animate-in slide-in-from-top-2 fade-in duration-300">
                   {/* Date Picker */}
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">Fecha de la Factura</Label>
@@ -243,24 +246,23 @@ export const CalculatorView = ({
                     </div>
                   </div>
 
-                  {/* Continue Button - only show if not yet proceeded */}
-                  {!step1Complete && (
-                    <Button 
-                      onClick={handleContinue} 
-                      disabled={!canProceed}
-                      className="w-full h-11 gradient-primary"
-                    >
-                      Continuar
-                    </Button>
-                  )}
+                  {/* Continue Button */}
+                  <Button 
+                    onClick={handleContinue} 
+                    disabled={!canProceed}
+                    className="w-full h-11 gradient-primary"
+                  >
+                    Continuar
+                  </Button>
                 </div>
-              </div>
+              )}
+            </div>
           </div>
 
           {/* Step 2: Invoice Total - only show after step 1 */}
           {step1Complete && (
             <>
-              <div className="p-5 border-b border-border">
+              <div className="p-5 border-b border-border animate-in slide-in-from-bottom-2 fade-in duration-500">
                 <div className="flex items-center gap-2 mb-4">
                   <div className={`h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold ${
                     hasResult ? 'bg-success text-success-foreground' : 'bg-primary text-primary-foreground'
@@ -367,7 +369,7 @@ export const CalculatorView = ({
 
         {/* Right Column - Breakdown Table */}
         {step1Complete && hasResult && (
-          <div className="space-y-4">
+          <div className="space-y-4 animate-in slide-in-from-bottom-4 duration-700">
             <BreakdownTable
               totalInvoice={totalInvoice}
               breakdown={calculations.breakdown}
